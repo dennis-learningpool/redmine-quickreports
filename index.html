@@ -1,0 +1,138 @@
+<html>
+  <head>
+    <title>Redmine QuickReports</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/custom-theme/jquery-ui-1.10.0.custom.css" rel="stylesheet">
+
+  </head>
+  <body>
+    <div class="container">
+
+      <div class="page-header">
+        <h2>Redmine QuickReports</h2>
+      </div>
+
+      <div class="row">
+        <nav class="navbar navbar-default" role="navigation">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <span class="navbar-brand">Jump to</span>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#redmine-settings">Redmine URL</a></li>
+            <li><a href="#my-timesheet">My Timesheet</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="row" id="redmine-settings">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Redmine URL</h3>
+          </div>
+          <div class="panel-body">
+            <form role="form" id="general">
+              <div class="form-group">
+                <div class="col-lg-6">
+                  <div class="input-group">
+                    <span class="input-group-addon">http://</span>
+                    <input type="text" class="form-control" id="redmine-url" />
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="row" id="my-timesheet">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">My Timesheet</h3>
+          </div>
+          <div class="panel-body">
+            <form role="form" id="timesheet-form">
+              <div class="form-group">
+                <div class="col-sm-2">
+                  <div class="input-group">
+                    <span class="input-group-addon">From</span>
+                    <input type="text" class="form-control" id="timesheet-from" />
+                  </div>
+                </div>
+                <div class="col-sm-2">
+                  <div class="input-group">
+                    <span class="input-group-addon">To</span>
+                    <input type="text" class="form-control" id="timesheet-to" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="input-group">
+                  <div class="col-sm-2">
+                    <span class="input-group-btn">
+                      <input class="btn btn-primary" id="go-timesheet" type="submit" value="Go!" />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </form>
+            <div>
+              <p class="small"><em>NOTE: Redmine's REST api does not currently allow parameters in its timesheet endpoint. This means that you need to be logged into your Redmine instance for the above report to work correctly. see <a href="http://www.redmine.org/boards/1/topics/29631">http://www.redmine.org/boards/1/topics/29631</a></em></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="jquery/jquery.js"></script>
+    <script src="jquery/jquery-ui.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+      // just quick and dirty stuff for now!
+      $(function(){
+        var dateFormat = 'yy-mm-dd';
+        var timesheetFrom = $('#timesheet-from').datepicker({ dateFormat: dateFormat });
+        var timesheetTo = $('#timesheet-to').datepicker({ dateFormat: dateFormat });
+        $('#timesheet-form').submit(function (e) {
+          var redmineURL = $.trim($('#redmine-url').val()).replace(/\/?$/, '');
+          var from = timesheetFrom.val();
+          var to = timesheetTo.val();
+          e.preventDefault();
+          if ($.trim(from).length === 0 || $.trim(to).length === 0) {
+            return alert('You must provide From and To dates!');
+          }
+
+          if (redmineURL.length === 0) {
+            return alert('You must set the redmine url!');
+          }
+
+          // preference is to use the REST API, but the time_entries service doesn't allow parameters :(
+          var target = 'http://' +
+            redmineURL +
+            '/time_entries/report.csv?columns=month&criteria[]=member&criteria[]=project&criteria[]=issue&from=' +
+            from +
+            '&period_type=2&to=' +
+            to;
+
+          // send the request
+          window.location = target;
+        });
+
+      });
+    </script>
+  </body>
+</html>
